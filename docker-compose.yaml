@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+  service-go:
+    build: ./service-go
+    depends_on:
+      - jaeger
+    ports:
+      - "8080:8080"
+  service-js:
+    build: ./service-js
+    depends_on:
+      - jaeger
+      - service-go
+    ports:
+      - "3000:3000"
