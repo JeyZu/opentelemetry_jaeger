@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   jaeger:
     image: jaegertracing/all-in-one:latest
@@ -6,16 +5,56 @@ services:
       - "16686:16686"
       - "4317:4317"
       - "4318:4318"
-  service-go:
-    build: ./service-go
-    depends_on:
-      - jaeger
-    ports:
-      - "8080:8080"
+    networks:
+      - jaeger-example
   service-js:
     build: ./service-js
     depends_on:
       - jaeger
-      - service-go
     ports:
       - "3000:3000"
+    environment:
+      DB_SERVICE_HOST: "http://service-db:3000"
+      OTEL_TRACES_EXPORTER: "otlp"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "service-js"
+      OTEL_NODE_RESOURCE_DETECTORS: "all"
+      OTEL_LOG_LEVEL: "debug"
+      NODE_OPTIONS: "--require @opentelemetry/auto-instrumentations-node/register"
+    networks:
+      - jaeger-example
+
+  service-db:
+    build: ./service-db
+    depends_on:
+      - jaeger
+      - db
+    ports:
+      - "3001:3000"
+    environment:
+      DB_HOST: db
+      OTEL_TRACES_EXPORTER: "otlp"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "service-db"
+      OTEL_NODE_RESOURCE_DETECTORS: "all"
+      OTEL_LOG_LEVEL: "debug"
+      NODE_OPTIONS: "--require @opentelemetry/auto-instrumentations-node/register"
+    networks:
+      - jaeger-example
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: observability
+    ports:
+      - "5432:5432"
+    networks:
+      - jaeger-example
+
+networks:
+  jaeger-example:

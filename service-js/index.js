@@ -1,32 +1,21 @@
-const express = require('express');
-const axios = require('axios');
-const { NodeSDK } = require('@opentelemetry/sdk-node');
-const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
-const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
-const { Resource } = require('@opentelemetry/resources');
-const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
-
-const sdk = new NodeSDK({
-  resource: new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: 'service-js',
-  }),
-  traceExporter: new OTLPTraceExporter({
-    url: 'http://jaeger:4318/v1/traces',
-  }),
-  instrumentations: [getNodeAutoInstrumentations()],
-});
-
-sdk.start();
+const express = require("express");
+const axios = require("axios");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const DB_SERVICE_HOST = process.env.DB_SERVICE_HOST || "http://service-db:3001";
 
-app.get('/', async (req, res) => {
+app.get("/", async (req, res) => {
   try {
-    const { data } = await axios.get('http://service-go:8080/hello');
-    res.send(data);
+    const response = await axios.get(`${DB_SERVICE_HOST}/`);
+
+    res.status(200).json({
+      status: "success",
+      serviceDb: response.data,
+    });
   } catch (err) {
-    res.status(500).send('error');
+    console.error("Erreur appel service-db:", err);
+    res.status(500).json({ status: "error", message: err.message });
   }
 });
 

@@ -4,8 +4,7 @@ This project demonstrates a minimal distributed tracing setup between a Node.js 
 
 ## Project structure
 
-- `service-js/` – simple Express server calling the Go service
-- `service-go/` – minimal Go HTTP server
+- `service-js/` – simple Express server calling the other js service
 - `docker-compose.yaml` – launches both services and Jaeger
 
 ## Quick start
@@ -13,7 +12,7 @@ This project demonstrates a minimal distributed tracing setup between a Node.js 
 Clone the repo and run:
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 Open `http://localhost:16686` to access the Jaeger UI. Jaeger 2.6 exposes an
