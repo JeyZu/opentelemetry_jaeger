@@ -1,0 +1,46 @@
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+    networks:
+      - jaeger-example
+  service-js:
+    build: ./service-js
+    depends_on:
+      - jaeger
+    ports:
+      - "3000:3000"
+    environment:
+      DB_SERVICE_HOST: "http://service-db:3000"
+    networks:
+      - jaeger-example
+
+  service-db:
+    build: ./service-db
+    depends_on:
+      - jaeger
+      - db
+    ports:
+      - "3001:3000"
+    environment:
+      DB_HOST: db
+    networks:
+      - jaeger-example
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: observability
+    ports:
+      - "5432:5432"
+    networks:
+      - jaeger-example
+
+networks:
+  jaeger-example:

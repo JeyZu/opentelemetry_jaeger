@@ -1,0 +1,33 @@
+node_modules
+npm-debug.log*
+yarn-debug.log*
+package-lock.json
+yarn.lock
+
+# Environnements
+.env
+.env.*
+
+# Logs
+logs/
+*.log
+
+# Docker
+db-data/
+**/docker-compose.override.yml
+
+# Système
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Build
+dist/
+build/
+
+# Autres fichiers temporaires
+*.tmp
+*.swp
